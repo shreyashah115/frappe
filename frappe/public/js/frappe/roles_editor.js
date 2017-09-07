@@ -3,20 +3,51 @@ frappe.RoleEditor = Class.extend({
 		var me = this;
 		this.frm = frm;
 		this.wrapper = wrapper;
-		$(wrapper).html('<div class="help">' + __("Loading") + '...</div>')
-		return frappe.call({
-			method: 'frappe.core.doctype.user.user.get_all_roles',
-			callback: function(r) {
-				me.roles = r.message;
-				me.show_roles();
+		if(frm.doctype == 'Role Profile')
+		{
+			$(wrapper).html('<div class="help">' + __("Loading") + '...</div>')
+			return frappe.call({
+				method: 'frappe.core.doctype.user.user.get_all_roles',
+				callback: function(r) {
+					me.roles = r.message;
+					me.show_roles();
 
-				// refresh call could've already happened
-				// when all role checkboxes weren't created
-				if(me.frm.doc) {
-					me.frm.roles_editor.show();
+					// refresh call could've already happened
+					// when all role checkboxes weren't created
+					if(me.frm.doc) {
+						me.frm.roles_editor.show();
+					}
 				}
+			});
+		}
+	},
+	show_only: function() {
+		var me = this;
+		
+        frappe.call({
+            "method": "frappe.client.get",
+            args: {
+                doctype: "Role Profile",
+                name: me.frm.doc.role_profile
+            },
+            callback: function (data) {
+            me.roles = data.message.roles;
+      		$(me.wrapper).empty();
+				$.each(me.roles, function(i, role) {
+					$(me.wrapper).append(repl('<div class="user-role" \
+						data-user-role="%(role_value)s">\
+						<a href="#" class="grey role">%(role_display)s</a>\
+					</div>', {role_value: role.role,role_display:__(role.role)}));
+				});
+		$(me.wrapper).find('.user-role a').click(function() {
+
+			me.show_permissions($(this).parent().attr('data-user-role'))
+			return false;
+	});
 			}
-		});
+		})
+
+
 	},
 	show_roles: function() {
 		var me = this;
@@ -103,6 +134,7 @@ frappe.RoleEditor = Class.extend({
 
 		refresh_field("roles");
 	},
+
 	get_roles: function() {
 		var checked_roles = [];
 		var unchecked_roles = [];

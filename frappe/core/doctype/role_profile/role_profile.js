@@ -12,5 +12,16 @@ frappe.ui.form.on('Role Profile', {
 				frm.roles_editor.show();
 			}
 		}
+		// refresh_field('roles_html');
+	},
+	refresh: function(frm) {
+		var doc = frm.doc;
+		frm.roles_editor && frm.roles_editor.show();
+
+	},
+	validate: function(frm) {
+		if(frm.roles_editor) {
+			frm.roles_editor.set_roles_in_table()
+		}
 	},
 });

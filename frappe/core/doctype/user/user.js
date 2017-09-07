@@ -17,20 +17,47 @@ frappe.ui.form.on('User', {
 		}
 
 	},
-	onload: function(frm) {
-		if(has_common(frappe.user_roles, ["Administrator", "System Manager"]) && !frm.doc.__islocal) {
-			if(!frm.roles_editor) {
-				var role_area = $('<div style="min-height: 300px">')
-					.appendTo(frm.fields_dict.roles_html.wrapper);
-				frm.roles_editor = new frappe.RoleEditor(role_area, frm);
+	role_profile: function(frm) {
+		// var existing_roles_list = []
+        frappe.call({
+            "method": "frappe.client.get",
+            args: {
+                doctype: "Role Profile",
+                name: frm.doc.role_profile
+            },
+            callback: function (data) {
+              frm.set_value('roles', data.message.roles);
+              frm.roles_editor.show_only();
+            
+    //           $.each(data.roles, function(i, role) {
+				// 	if(existing_roles_list.indexOf(role)==-1) {
+				// 		var user_role = frappe.model.add_child(me.frm.doc, "Has Role", "roles");
+				// 		user_role.role = role;
+				// 	}
+				// });
 
-				var module_area = $('<div style="min-height: 300px">')
-					.appendTo(frm.fields_dict.modules_html.wrapper);
-				frm.module_editor = new frappe.ModuleEditor(frm, module_area)
-			} else {
-				frm.roles_editor.show();
+            }
+        });
+
+  },
+	onload: function(frm) {
+		if(frm.doc.role_profile){
+			if(has_common(frappe.user_roles, ["Administrator", "System Manager"]) && !frm.doc.__islocal) {
+				if(!frm.roles_editor) {
+					var role_area = $('<div style="min-height: auto">')
+						.appendTo(frm.fields_dict.roles_html.wrapper);
+					frm.roles_editor = new frappe.RoleEditor(role_area, frm);
+
+					var module_area = $('<div style="min-height: 300px">')
+						.appendTo(frm.fields_dict.modules_html.wrapper);
+					frm.module_editor = new frappe.ModuleEditor(frm, module_area)
+				} 
+				// else {
+				// 	frm.roles_editor.show_only();
+				// }
 			}
 		}
+
 	},
 	refresh: function(frm) {
 		var doc = frm.doc;
@@ -89,7 +116,7 @@ frappe.ui.form.on('User', {
 
 			frm.trigger('enabled');
 
-			frm.roles_editor && frm.roles_editor.show();
+			frm.roles_editor && frm.roles_editor.show_only();
 			frm.module_editor && frm.module_editor.refresh();
 
 			if(frappe.session.user==doc.name) {
