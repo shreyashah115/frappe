@@ -12,7 +12,7 @@ frappe.ui.form.on('Role Profile', {
 				frm.roles_editor.show();
 			}
 		}
-		// refresh_field('roles_html');
+		refresh_field('roles_html');
 	},
 	refresh: function(frm) {
 		var doc = frm.doc;

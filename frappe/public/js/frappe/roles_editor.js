@@ -3,82 +3,53 @@ frappe.RoleEditor = Class.extend({
 		var me = this;
 		this.frm = frm;
 		this.wrapper = wrapper;
-		if(frm.doctype == 'Role Profile')
-		{
-			$(wrapper).html('<div class="help">' + __("Loading") + '...</div>')
-			return frappe.call({
-				method: 'frappe.core.doctype.user.user.get_all_roles',
-				callback: function(r) {
-					me.roles = r.message;
-					me.show_roles();
+		$(wrapper).html('<div class="help">' + __("Loading") + '...</div>')
+		return frappe.call({
+			method: 'frappe.core.doctype.user.user.get_all_roles',
+			callback: function(r) {
+				me.roles = r.message;
+				me.show_roles();
 
-					// refresh call could've already happened
-					// when all role checkboxes weren't created
-					if(me.frm.doc) {
-						me.frm.roles_editor.show();
-					}
+				// refresh call could've already happened
+				// when all role checkboxes weren't created
+				if(me.frm.doc) {
+					me.frm.roles_editor.show();
 				}
-			});
-		}
-	},
-	show_only: function() {
-		var me = this;
-		
-        frappe.call({
-            "method": "frappe.client.get",
-            args: {
-                doctype: "Role Profile",
-                name: me.frm.doc.role_profile
-            },
-            callback: function (data) {
-            me.roles = data.message.roles;
-      		$(me.wrapper).empty();
-				$.each(me.roles, function(i, role) {
-					$(me.wrapper).append(repl('<div class="user-role" \
-						data-user-role="%(role_value)s">\
-						<a href="#" class="grey role">%(role_display)s</a>\
-					</div>', {role_value: role.role,role_display:__(role.role)}));
-				});
-		$(me.wrapper).find('.user-role a').click(function() {
-
-			me.show_permissions($(this).parent().attr('data-user-role'))
-			return false;
-	});
 			}
-		})
-
-
+		});
 	},
 	show_roles: function() {
 		var me = this;
 		$(this.wrapper).empty();
-		var role_toolbar = $('<p><button class="btn btn-default btn-add btn-sm" style="margin-right: 5px;"></button>\
-			<button class="btn btn-sm btn-default btn-remove"></button></p>').appendTo($(this.wrapper));
+		if(me.frm.doctype!='User'){
+			var role_toolbar = $('<p><button class="btn btn-default btn-add btn-sm" style="margin-right: 5px;"></button>\
+				<button class="btn btn-sm btn-default btn-remove"></button></p>').appendTo($(this.wrapper));
 
-		role_toolbar.find(".btn-add")
-			.html(__('Add all roles'))
-			.on("click", function () {
-				$(me.wrapper).find('input[type="checkbox"]').each(function (i, check) {
-					if (!$(check).is(":checked")) {
-						check.checked = true;
-					}
+			role_toolbar.find(".btn-add")
+				.html(__('Add all roles'))
+				.on("click", function () {
+					$(me.wrapper).find('input[type="checkbox"]').each(function (i, check) {
+						if (!$(check).is(":checked")) {
+							check.checked = true;
+						}
+					});
 				});
-			});
 
-		role_toolbar.find(".btn-remove")
-			.html(__('Clear all roles'))
-			.on("click", function() {
-				$(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
-					if($(check).is(":checked")) {
-						check.checked = false;
-					}
+			role_toolbar.find(".btn-remove")
+				.html(__('Clear all roles'))
+				.on("click", function() {
+					$(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
+						if($(check).is(":checked")) {
+							check.checked = false;
+						}
+					});
 				});
-			});
+		}
 
 		$.each(this.roles, function(i, role) {
 			$(me.wrapper).append(repl('<div class="user-role" \
 				data-user-role="%(role_value)s">\
-				<input type="checkbox" style="margin-top:0px;"> \
+				<input type="checkbox" style="margin-top:0px;" class="box"> \
 				<a href="#" class="grey role">%(role_display)s</a>\
 			</div>', {role_value: role,role_display:__(role)}));
 		});
@@ -100,11 +71,25 @@ frappe.RoleEditor = Class.extend({
 			.each(function(i, checkbox) { checkbox.checked = false; });
 
 		// set user roles as checked
-		$.each((me.frm.doc.roles || []), function(i, user_role) {
-			var checkbox = $(me.wrapper)
-				.find('[data-user-role="'+user_role.role+'"] input[type="checkbox"]').get(0);
-			if(checkbox) checkbox.checked = true;
-		});
+		frappe.call({
+            "method": "frappe.client.get",
+            args: {
+                doctype: "Role Profile",
+                name: me.frm.doc.role_name
+            },
+            callback: function (data) {
+            	me.frm.set_value('roles', data.message.roles);
+          		$.each((me.frm.doc.roles || []), function(i, user_role) {
+					var checkbox = $(me.wrapper)
+						.find('[data-user-role="'+user_role.role+'"] input[type="checkbox"]').get(0);
+					if(checkbox) checkbox.checked = true;
+				});
+
+				if(me.frm.doctype == 'User'){
+					$('.box').attr('disabled', "disabled");
+				}
+            }
+        });
 	},
 	set_roles_in_table: function() {
 		var opts = this.get_roles();
