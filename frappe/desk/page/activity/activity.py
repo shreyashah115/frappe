@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint
-from frappe.core.doctype.communication.feed import get_feed_match_conditions
+from frappe.core.doctype.activity_log.feed import get_feed_match_conditions
 
 @frappe.whitelist()
 def get_feed(start, page_length, show_likes=False):
@@ -42,33 +42,10 @@ def get_feed(start, page_length, show_likes=False):
 
 @frappe.whitelist()
 def get_heatmap_data():
-<<<<<<< HEAD
+
 	return dict(frappe.db.sql("""select unix_timestamp(date(creation)), count(name)
-		from `tabCommunication`
+		from `tabActivity Log`
 		where
-			communication_type in ("Communication", "Comment")
-			and communication_medium != "Email"
-			and date(creation) > subdate(curdate(), interval 1 year)
+			date(creation) > subdate(curdate(), interval 1 year)
 		group by date(creation)
 		order by creation asc"""))
-=======
-	return (frappe.db.sql("""select X.*
-			from (select
-	  			unix_timestamp(date(creation)),
-	 	  		count(name)
-				from `tabCommunication`
-				where
-				communication_type in ("Communication", "Comment")
-	 			and communication_medium != "Email"
-	 			and date(creation) > subdate(curdate(), interval 1 year)
-
-				union
-
-				select unix_timestamp(date(creation)),
-	 		    count(name)
-				from `tabActivity Log`
-				where date(creation) > subdate(curdate(), interval 1 year)) X
-
-			group by date(X.creation)
-			order by X.creation asc"""))
->>>>>>> c96c86c... mod
