@@ -203,11 +203,30 @@ frappe.views.Calendar = Class.extend({
 				element.attr('title', event.tooltip);
 			},
 			eventClick: function(event, jsEvent, view) {
+
+				fields = [
+				{ label: __('Color'), fieldtype: 'Color', fieldname: 'color', default: '#d2d2ff' }]
+
+
+				this.f = frappe.ui.form.make_control({
+					df: { "label": _("Color"), "fieldtype": "Color", "fieldname": "color", "default": "#d2d2ff" },
+					parent: ,
+					only_input: true	
+				})
+
+				$this = $(this);
+				var html = `<h5><a style="text-decoration:underline"\
+					href="#Form/Quotation/${event.id}""> ${event.name} </a></h5>`;
+				url = '<div class= "details-container">' + html +'</div>'
+
+				$this.popover({html:true,title:event.title,content: url,placement:'right',container:'.page-body'});
+				$('.popover.in').remove();
+				$this.popover('show');
 				// edit event description or delete
-				var doctype = event.doctype || me.doctype;
-				if(frappe.model.can_read(doctype)) {
-					frappe.set_route("Form", doctype, event.name);
-				}
+				// var doctype = event.doctype || me.doctype;
+				// if(frappe.model.can_read(doctype)) {
+				// 	frappe.set_route("Form", doctype, event.name);
+				// }
 			},
 			eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
 				me.update_event(event, revertFunc);

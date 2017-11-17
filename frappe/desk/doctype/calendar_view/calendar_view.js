@@ -29,6 +29,7 @@ frappe.ui.form.on('Calendar View', {
 			frm.set_df_property('subject_field', 'options', subject_options);
 			frm.set_df_property('start_date_field', 'options', date_options);
 			frm.set_df_property('end_date_field', 'options', date_options);
+
 			frm.refresh();
 		});
 	}
