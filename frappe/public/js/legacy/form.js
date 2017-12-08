@@ -4,7 +4,7 @@
 /* Form page structure
 
 	+ this.parent (either FormContainer or Dialog)
-		+ this.wrapper
+ 		+ this.wrapper
 			+ this.toolbar
 			+ this.form_wrapper
 					+ this.head
@@ -509,6 +509,7 @@ _f.Frm.prototype.render_form = function(is_a_different_doc) {
 
 		// call onload post render for callbacks to be fired
 		if(this.cscript.is_onload) {
+			this.get_ifttt();
 			this.script_manager.trigger("onload_post_render");
 		}
 
@@ -589,7 +590,7 @@ _f.Frm.prototype.setnewdoc = function() {
 	// moved this call to refresh function
 	// this.check_doctype_conflict(docname);
 	var me = this;
-
+	this.get_ifttt();
 	// hide any open grid
 	this.script_manager.trigger("before_load", this.doctype, this.docname)
 		.then(() => {
@@ -865,8 +866,34 @@ _f.Frm.prototype.save_or_update = function() {
 
 _f.Frm.prototype.dirty = function() {
 	this.doc.__unsaved = 1;
+	this.get_ifttt();
 	this.$wrapper.trigger('dirty');
 };
+
+
+_f.Frm.prototype.get_ifttt = function() {
+	var me = this;
+	frappe.call({
+		method: "frappe.core.doctype.if_this_then_that.if_this_then_that.get_values",
+		args: {
+			"doctype": me.doctype
+		},
+		callback: function(i) {
+			if (i.message.if != null) {
+				let f = i.message.if.fieldname;
+				let v = i.message.if.value;
+				let val = frappe.model.get_value(me.doctype,me.docname,f);
+				if (val == v) {
+					for(x in i.message.then){
+						let f = i.message.then[x].fieldname;
+						let v = i.message.then[x].value;
+						frappe.model.set_value(me.doctype,me.docname,f,v);
+					}
+				}
+			}
+		}	
+	});
+}
 
 _f.Frm.prototype.get_docinfo = function() {
 	return frappe.model.docinfo[this.doctype][this.docname];
@@ -923,16 +950,10 @@ _f.Frm.prototype.add_custom_button = function(label, fn, group) {
 	return btn;
 };
 
-//Remove all custom buttons
 _f.Frm.prototype.clear_custom_buttons = function() {
 	this.page.clear_inner_toolbar();
 	this.page.clear_user_actions();
 	this.custom_buttons = {};
-};
-
-//Remove specific custom button by button Label
-_f.Frm.prototype.remove_custom_button = function(label, group) {
-	this.page.remove_inner_button(label, group);
 };
 
 _f.Frm.prototype.add_fetch = function(link_field, src_field, tar_field) {
