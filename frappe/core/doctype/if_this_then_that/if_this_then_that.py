@@ -13,7 +13,7 @@ class IfThisThenThat(Document):
 
 def get_values(doctype):
 	value = frappe.db.get_value("If This Then That", {"doctype_name": doctype}, "name")
-	ifchild = frappe.db.get_value("If", {"parent": value}, ["fieldname", "value"], as_dict=True)
+	ifchild = frappe.db.get_values("If", {"parent": value}, ["fieldname", "value"], as_dict=True)
 	thenchild = frappe.db.get_values("Then", {"parent": value}, ["fieldname", "value"], as_dict=True)
 
 	return {"if": ifchild, "then": thenchild}

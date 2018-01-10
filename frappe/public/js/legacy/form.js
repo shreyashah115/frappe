@@ -879,17 +879,17 @@ _f.Frm.prototype.get_ifttt = function() {
 			"doctype": me.doctype
 		},
 		callback: function(i) {
-			if (i.message.if != null) {
-				let f = i.message.if.fieldname;
-				let v = i.message.if.value;
-				let val = frappe.model.get_value(me.doctype,me.docname,f);
-				if (val == v) {
-					for(x in i.message.then){
-						let f = i.message.then[x].fieldname;
-						let v = i.message.then[x].value;
-						frappe.model.set_value(me.doctype,me.docname,f,v);
-					}
-				}
+			if(i.message.if.length) {
+				$.each(i.message.if, function(index,v) {
+					doc_value = frappe.model.get_value(me.doctype, me.docname, v.fieldname)
+					if (doc_value != v.value)
+						return false;
+					if (index == (i.message.if.length) - 1) {
+						$.each(i.message.then, function(i, v) {
+							frappe.model.set_value(me.doctype, me.docname, v.fieldname, v.value);
+						})
+					}	
+				})
 			}
 		}	
 	});
