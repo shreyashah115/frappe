@@ -273,6 +273,12 @@ def get_password(doctype, name, fieldname):
 	frappe.only_for("System Manager")
 	return frappe.get_doc(doctype, name).get_password(fieldname)
 
+@frappe.whitelist()
+def has_column(doctype, fieldname):
+	if not frappe.has_permission(doctype):
+		frappe.throw(_("No permission for {doctype}".format(doctype = doctype)), frappe.PermissionError)
+	value = frappe.db.has_column(doctype, fieldname)
+	return value
 
 @frappe.whitelist()
 def get_js(items):

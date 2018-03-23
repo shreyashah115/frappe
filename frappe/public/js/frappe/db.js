@@ -43,6 +43,19 @@ frappe.db = {
 			}
 		});
 	},
+	has_column: function(doctype, fieldname, callback) {
+		return frappe.call({
+			method: "frappe.client.has_column",
+			async: false,
+			args: {
+				doctype: doctype,
+				fieldname: fieldname
+			},
+			callback: function(r) {
+				callback && callback(r.message);
+			}
+		})
+	},
 	set_value: function(doctype, docname, fieldname, value, callback) {
 		return frappe.call({
 			method: "frappe.client.set_value",
