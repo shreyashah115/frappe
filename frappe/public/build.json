@@ -140,6 +140,10 @@
 		"public/js/lib/leaflet/L.Control.Locate.js",
 		"public/js/lib/leaflet/easy-button.js"
 	],
+	"concat:js/ace.min.js": [
+		"public/js/lib/ace/ace.min.js",
+		"public/js/lib/ace/mode-javascript.js"
+	],
 	"js/desk.min.js": [
 		"public/js/frappe/class.js",
 		"public/js/frappe/polyfill.js",
