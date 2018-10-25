@@ -474,6 +474,7 @@ export default class Grid {
 				this.frm.script_manager.trigger(this.df.fieldname + "_add", d.doctype, d.name);
 				this.refresh();
 			} else {
+				console.log(this);
 				this.df.data.push({name: "batch " + (this.df.data.length+1), idx: this.df.data.length+1});
 				this.refresh();
 			}
