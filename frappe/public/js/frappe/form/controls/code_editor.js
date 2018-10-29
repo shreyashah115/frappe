@@ -1,45 +1,53 @@
 frappe.ui.form.ControlCodeEditor = frappe.ui.form.ControlCode.extend({
+	horizontal: false,
+	html_element: "input",
+	input_type: "text",
 	make_input: function() {
-		this._super();
 		this.has_input = true;
+		var me = this;
 		this.load_ace_editor().then(() => {
-			this.make_editor();
+			me.make_editor();
 		});
 	},
 	make_editor: function() {
-		var me = this;
-		this.textarea = this.$input;
-		this.ace_container = $('<div>', {
-			position: 'absolute',
-			width: this.textarea.width(),
-			height: this.textarea.height(),
-			'class': this.textarea.attr('class')
-		}).insertBefore(this.textarea);
-		this.textarea.css('display', 'none');
+		this.ace_container = $('<div>').appendTo(this.input_area);
+		this.ace_container.addClass('panel panel-default');
+		this.ace_container.addClass('control-code')
 		this.editor = ace.edit(this.ace_container[0]);
 		this.editor.getSession().setUseWrapMode(true);
 		this.editor.renderer.setShowGutter(true);
-		this.editor.setAutoScrollEditorIntoView(true);
+		// this.editor.setAutoScrollEditorIntoView(true);
 		this.editor.getSession().setMode("ace/mode/javascript");
 		this.editor.setFontSize(13);
-		this.editor.getSession().setValue(this.textarea.val());
-		// this.bind_events();
+		this.bind_events();
 	},
-	// bind_events: function() {
-	// 	this.editor.on('change', frappe.utils.debounce((delta, oldDelta, source) => {
-	// 		// if (!this.is_quill_dirty(source)) return;
-	// 		// const input_value = this.get_input_value();
-	// 		// this.parse_validate_and_set_in_model(input_value);
-	// 	}, 300));
-	// },
-
-	parse: function(value){
-		if(!this.editor) return;
-		this.editor.getSession().setValue(value);
-		if(this.editor.getSession().getValue() != value) {
-			this.frm.set_value("script", this.editor.getSession().getValue());
-			return;
+	bind_events: function() {
+		this.editor.on('change', () => {
+			const input_value = this.get_input_value();
+			this.parse_validate_and_set_in_model(input_value);
+		});
+	},
+	get_input_value() {
+		return this.editor ? this.editor.getSession().getValue() : '';
+	},
+	set_input: function(value) {
+		var me = this;
+		if(value) {
+			me.editor.getSession().setValue(value);
 		}
+		else {
+			me.editor.getSession().setValue("");
+		}
+		// var me = this;
+
+		// this.last_value = this.value;
+		// this.value = value;
+	},
+	// parse: function(value) {
+
+	// },
+	set_formatted_input: function(value) {
+		this.$input && this.$input.val(this.format_for_input(value));
 	},
 	load_ace_editor: function() {
 		return new Promise(resolve => {
